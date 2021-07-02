@@ -1,8 +1,6 @@
 function runSDRuQPSKTransmitter(prmQPSKTransmitter)
     %#codegen
 
-    %   Copyright 2012-2020 The MathWorks, Inc.
-
     persistent hTx radio
 
     if isempty(hTx)
@@ -22,6 +20,8 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
         % Create and configure the SDRu System object. Set the SerialNum for B2xx
         % radios and IPAddress for X3xx, N2xx, and USRP2 radios. MasterClockRate
         % is not configurable for N2xx and USRP2 radios.
+        %{
+
         switch prmQPSKTransmitter.Platform
             case {'B200', 'B210'}
                 radio = comm.SDRuTransmitter(...
@@ -64,6 +64,14 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
                     'InterpolationFactor', prmQPSKTransmitter.USRPInterpolationFactor);
         end
 
+        %}
+
+        radio = comm.SDRuTransmitter(...
+            'Platform', prmQPSKTransmitter.Platform, ...
+            'IPAddress', prmQPSKTransmitter.Address, ...
+            'CenterFrequency', prmQPSKTransmitter.USRPCenterFrequency, ...
+            'Gain', prmQPSKTransmitter.USRPGain, ...
+            'InterpolationFactor', prmQPSKTransmitter.USRPInterpolationFactor);
     end
 
     currentTime = 0;

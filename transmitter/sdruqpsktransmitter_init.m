@@ -1,6 +1,6 @@
-function SimParams = sdruqpsktransmitter_init(platform, useCodegen)
-    %   Copyright 2012-2017 The MathWorks, Inc.
+% function SimParams = sdruqpsktransmitter_init(platform, useCodegen)
 
+function SimParams = sdruqpsktransmitter_init(useCodegen)
     %% General simulation parameters
     if useCodegen
         SimParams.Rsym = 0.4e6; % Symbol rate in Hertz
@@ -46,6 +46,8 @@ function SimParams = sdruqpsktransmitter_init(platform, useCodegen)
     SimParams.MessageBits = bits(:);
 
     %% USRP transmitter parameters
+    %{
+
     switch platform
         case {'B200', 'B210'}
             SimParams.MasterClockRate = 20e6; % Hz
@@ -61,6 +63,10 @@ function SimParams = sdruqpsktransmitter_init(platform, useCodegen)
             error(message('sdru:examples:UnsupportedPlatform', ...
                 platform))
     end
+
+    %}
+
+    SimParams.MasterClockRate = 100e6; % Hz
 
     SimParams.USRPCenterFrequency = 915e6;
     SimParams.USRPGain = 25;
