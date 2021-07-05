@@ -1,8 +1,7 @@
 function runSDRuQPSKTransmitter(prmQPSKTransmitter)
     %#codegen
 
-    persistent hTx
-    global radio
+    persistent hTx radio
 
     if isempty(hTx)
         % Initialize the components
