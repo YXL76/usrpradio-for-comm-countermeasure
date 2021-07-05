@@ -1,8 +1,8 @@
-connectedRadios = findsdru;
+connectedRadios = findsdru
 
 if strncmp(connectedRadios(1).Status, 'Success', 7)
     platform = connectedRadios(1).Platform;
-    address = connectedRadios(1).SerialNum;
+    address = connectedRadios(1).IPAddress;
 else
     address = '192.168.10.2';
     platform = 'N200/N210/USRP2';
@@ -13,7 +13,7 @@ useCodegen = false; % true to run the latest generated mex file
 
 % Transmitter parameter structure
 % prmQPSKTransmitter = sdruqpsktransmitter_init(platform, useCodegen);
-prmQPSKTransmitter = sdruqpsktransmitter_init(useCodegen);
+prmQPSKTransmitter = sdruqpsktransmitter_init(useCodegen)
 prmQPSKTransmitter.Platform = platform;
 prmQPSKTransmitter.Address = address;
 

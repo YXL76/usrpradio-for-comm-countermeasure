@@ -1,7 +1,8 @@
 function runSDRuQPSKTransmitter(prmQPSKTransmitter)
     %#codegen
 
-    persistent hTx radio
+    persistent hTx
+    global radio
 
     if isempty(hTx)
         % Initialize the components
@@ -74,17 +75,44 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
             'InterpolationFactor', prmQPSKTransmitter.USRPInterpolationFactor);
     end
 
+    disp('start')
+
+    % t = timer('StartDelay', 0, 'Period', 1, 'TasksToExecute', Inf, ...
+        %     'ExecutionMode', 'fixedRate');
+
+    % t.TimerFcn = @(~, ~)cb_fcn;
+
+    % start(t)
+
     currentTime = 0;
+
+    tic
 
     %Transmission Process
     while currentTime < prmQPSKTransmitter.StopTime
+
+        % if radio.CenterFrequency ~= 910e6
+        %     radio.CenterFrequency = 910e6
+        % end
+
         % Bit generation, modulation and transmission filtering
         data = hTx();
         % Data transmission
         radio(data);
         % Update simulation time
         currentTime = currentTime + prmQPSKTransmitter.USRPFrameTime;
+
+        d = clock;
+
+        if mod(d(6), 4) > 2
+            radio.CenterFrequency = 910e6;
+        else
+            radio.CenterFrequency = 911e6;
+        end
+
     end
+
+    % stop(t)
 
     release(hTx);
     release(radio);
