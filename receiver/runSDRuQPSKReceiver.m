@@ -112,27 +112,16 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
     BER = [];
     currentTime = 0;
 
-    flag = false;
-    tt = false;
+    timestep = 2;
+    d = clock;
+    fcIdx = max(ceil(d(6) / timestep), 1);
+    flag = mod(fcIdx * timestep, 60);
+    radio.CenterFrequency = prmQPSKReceiver.Fcs(fcIdx);
 
-    while ~tt
-        d = clock;
+    rev = zeros(10000000);
+    idx = 1;
 
-        if (mod(d(6), 2) > 1)
-
-            if ~flag
-                tt = true;
-                flag = true;
-                radio.CenterFrequency = 987e6;
-            end
-
-        elseif flag
-            tt = true;
-            flag = false;
-            radio.CenterFrequency = 987e6;
-        end
-
-    end
+    paused = false;
 
     while currentTime < prmQPSKReceiver.StopTime
         % Keep accessing the SDRu System object output until it is valid
@@ -140,30 +129,61 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
             [rcvdSignal, len] = step(radio);
         end
 
+        d = clock;
+
+        if paused && d(6) > flag
+            flag = flag + timestep - 0.2;
+            paused = false;
+            continue
+        end
+
         % When the SDRu System object output is valid, decode the received
         % message
         if len > 0
-            [~, ~, ~, BER] = qpskRx(rcvdSignal); % Receiver
+            [~, ~, ~, BER, msg] = qpskRx(rcvdSignal); % Receiver
+            l = length(msg);
+            rev(idx:idx + l) = msg;
+            idx = idx + l;
         end
 
         len = uint32(0);
         currentTime = currentTime + prmQPSKReceiver.USRPFrameTime;
 
-        d = clock;
+        % TODO position
 
-        if (mod(d(6), 2) > 1)
+        if d(6) > flag
+            flag = flag + 0.2;
 
-            if ~flag
-                flag = true;
-                radio.CenterFrequency = 987e6;
+            if flag >= 60
+                flag = 0;
+                fcIdx = 1;
+            else
+                fcIdx = fcIdx + 1;
             end
 
-        elseif flag
-            flag = false;
-            radio.CenterFrequency = 987e6;
+            radio.CenterFrequency = prmQPSKTransmitter.Fcs(fcIdx);
+            paused = true;
         end
 
+        %{
+
+        if d(6) > flag
+            flag = flag + timestep;
+
+            if flag >= 60
+                flag = timestep;
+                fcIdx = 1;
+            else
+                fcIdx = fcIdx + 1;
+            end
+
+            radio.CenterFrequency = prmQPSKTransmitter.Fcs(fcIdx);
+        end
+
+        %}
     end
+
+    save('test.mat', 'rev', '-v7.3')
 
     release(qpskRx);
     release(radio);

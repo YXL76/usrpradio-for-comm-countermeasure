@@ -78,10 +78,25 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
 
     currentTime = 0;
 
-    flag = false;
+    timestep = 2;
+    d = clock;
+    fcIdx = max(ceil(d(6) / timestep), 1);
+    % flag = mod((fcIdx + 1) * timestep, 60);
+    flag = mod(fcIdx * timestep - 0.2, 60);
+    radio.CenterFrequency = prmQPSKTransmitter.Fcs(fcIdx);
+
+    paused = false;
 
     %Transmission Process
     while currentTime < prmQPSKTransmitter.StopTime
+
+        d = clock;
+
+        if paused && d(6) > flag
+            flag = flag + timestep - 0.2;
+            paused = false;
+            continue
+        end
 
         % Bit generation, modulation and transmission filtering
         data = hTx();
@@ -90,23 +105,37 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
         % Update simulation time
         currentTime = currentTime + prmQPSKTransmitter.USRPFrameTime;
 
-        d = clock;
+        if d(6) > flag
+            flag = flag + 0.2;
 
-        if (mod(d(6), 1) > 0.5)
-
-            if ~flag
-                flag = true;
-                radio.CenterFrequency = 915e6;
+            if flag >= 60
+                flag = 0;
+                fcIdx = 1;
+            else
+                fcIdx = fcIdx + 1;
             end
 
-        elseif flag
-            flag = false;
-            radio.CenterFrequency = 914e6;
+            radio.CenterFrequency = prmQPSKTransmitter.Fcs(fcIdx);
+            paused = true;
         end
 
-    end
+        %{
 
-    % stop(t)
+        if d(6) > flag
+            flag = flag + timestep;
+
+            if flag >= 60
+                flag = timestep;
+                fcIdx = 1;
+            else
+                fcIdx = fcIdx + 1;
+            end
+
+            radio.CenterFrequency = prmQPSKTransmitter.Fcs(fcIdx);
+        end
+
+        %}
+    end
 
     release(hTx);
     release(radio);

@@ -129,7 +129,7 @@ classdef (StrictDefaults)QPSKReceiver < matlab.System
                 'InterweaveLength', obj.InterweaveLength);
         end
 
-        function [RCRxSignal, timingRecSignal, fineCompSignal, BER] = stepImpl(obj, bufferSignal)
+        function [RCRxSignal, timingRecSignal, fineCompSignal, BER, msg] = stepImpl(obj, bufferSignal)
 
             AGCSignal = obj.pAGC(bufferSignal); % AGC control
             RCRxSignal = obj.pRxFilter(AGCSignal); % Pass the signal through
@@ -152,7 +152,7 @@ classdef (StrictDefaults)QPSKReceiver < matlab.System
             [symFrame, isFrameValid] = obj.pFrameSync(fineCompSignal, ...
                 prbIdx, dtMt); % Frame synchronization
 
-            BER = obj.pDataDecod(symFrame, isFrameValid);
+            [BER, msg] = obj.pDataDecod(symFrame, isFrameValid);
 
         end
 

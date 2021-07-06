@@ -15,7 +15,7 @@ printReceivedData = true; % true if the received data is to be printed
 % Receiver parameter structure
 % prmQPSKReceiver = sdruqpskreceiver_init(useCodegen)
 prmQPSKReceiver = sdruqpskreceiver_init() %#ok<NOPTS>
-prmQPSKReceiver.Platform = platform;
+prmQPSKReceiver.Platform = platform;    
 prmQPSKReceiver.Address = address;
 
 %{

@@ -13,6 +13,8 @@ function SimParams = sdruqpskreceiver_init()
 
     %}
 
+    SimParams.Fcs = load('fc.mat').fc;
+
     SimParams.Rsym = 0.2e6; % Symbol rate in Hertz
 
     SimParams.ModulationOrder = 4; % QPSK alphabet size
@@ -26,8 +28,8 @@ function SimParams = sdruqpskreceiver_init()
     SimParams.BarkerCode = [+1 +1 +1 +1 +1 -1 -1 +1 +1 -1 +1 -1 +1]; % Bipolar Barker Code
     SimParams.BarkerLength = length(SimParams.BarkerCode);
     SimParams.HeaderLength = SimParams.BarkerLength * 2; % Duplicate 2 Barker codes to be as a header
-    SimParams.symbol_per_frame = 10;
-    SimParams.Message = load('randnum.mat').randnum;
+    SimParams.symbol_per_frame = 20;
+    SimParams.Message = load('datatest.mat').x;
     SimParams.MessageLength = length(SimParams.Message) / SimParams.symbol_per_frame; % 'Hello world 000\n'...
     SimParams.NumberOfMessage = 1; % Number of messages in a frame
     SimParams.PayloadLength = SimParams.NumberOfMessage * SimParams.symbol_per_frame * 7; % 7 bits per characters

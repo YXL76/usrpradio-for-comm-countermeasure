@@ -13,6 +13,8 @@ function SimParams = sdruqpsktransmitter_init()
 
     %}
 
+    SimParams.Fcs = load('fc.mat').fc;
+
     SimParams.Rsym = 0.2e6; % Symbol rate in Hertz
 
     SimParams.ModulationOrder = 4; % QPSK alphabet size

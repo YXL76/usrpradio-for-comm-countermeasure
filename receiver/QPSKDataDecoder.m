@@ -79,7 +79,7 @@ classdef QPSKDataDecoder < matlab.System
             obj.pTrt = syndtable(h);
         end
 
-        function BER = stepImpl(obj, data, isValid)
+        function [BER, msg] = stepImpl(obj, data, isValid)
 
             if isValid
                 % Phase ambiguity estimation
@@ -105,14 +105,15 @@ classdef QPSKDataDecoder < matlab.System
                 err_loc = obj.pTrt(err + 1, :);
                 ccode = rem(err_loc + code, 2);
                 msg = ccode(:, 4:7); % 7 - 4 + 1 = 4
+                msg = int8(bi2de(msg, 'left-msb'));
 
                 % Recovering the message from the data
-                if (obj.PrintOption)
-
-                    fprintf(' %d ', transpose(int8(bi2de(msg, 'left-msb'))));
-                    fprintf('\n');
-                    % fprintf('%s', char(charSet));
-                end
+                % if (obj.PrintOption)
+                %
+                %     fprintf(' %d ', transpose(int8(bi2de(msg, 'left-msb'))));
+                %     fprintf('\n');
+                %     % fprintf('%s', char(charSet));
+                % end
 
                 % Perform BER calculation only on message part
                 % obj.pBER = obj.pErrorRateCalc(obj.pTargetBits, deScrData);
