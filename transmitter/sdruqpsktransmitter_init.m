@@ -19,10 +19,10 @@ function SimParams = sdruqpsktransmitter_init(useCodegen)
     SimParams.BarkerCode = [+1 +1 +1 +1 +1 -1 -1 +1 +1 -1 +1 -1 +1]; % Bipolar Barker Code
     SimParams.BarkerLength = length(SimParams.BarkerCode);
     SimParams.HeaderLength = SimParams.BarkerLength * 2; % Duplicate 2 Barker codes to be as a header
-    SimParams.Message = 'Hello world';
-    SimParams.MessageLength = length(SimParams.Message) + 5; % 'Hello world 000\n'...
-    SimParams.NumberOfMessage = 100; % Number of messages in a frame
-    SimParams.PayloadLength = SimParams.NumberOfMessage * SimParams.MessageLength * 7; % 7 bits per characters
+    SimParams.Message = load("randnum.mat").randnum;
+    SimParams.MessageLength = length(SimParams.Message); % 'Hello world 000\n'...
+    SimParams.NumberOfMessage = 1; % Number of messages in a frame
+    SimParams.PayloadLength = SimParams.NumberOfMessage * SimParams.symbol_per_frame * 7; % 7 bits per characters
     SimParams.FrameSize = (SimParams.HeaderLength + SimParams.PayloadLength) ...
         / log2(SimParams.ModulationOrder); % Frame size in symbols
     SimParams.FrameTime = SimParams.Tsym * SimParams.FrameSize;
@@ -35,6 +35,8 @@ function SimParams = sdruqpsktransmitter_init(useCodegen)
     SimParams.RaisedCosineFilterSpan = 10; % Filter span of Raised Cosine Tx Rx filters (in symbols)
 
     %% Message generation
+    %{
+
     msgSet = zeros(100 * SimParams.MessageLength, 1);
 
     for msgCnt = 0:99
@@ -44,6 +46,19 @@ function SimParams = sdruqpsktransmitter_init(useCodegen)
 
     bits = de2bi(msgSet, 7, 'left-msb')';
     SimParams.MessageBits = bits(:);
+
+    %}
+
+    bits = de2bi(SimParams.Message, 4, 'left-msb')';
+    symbol_per_frame = 10; % 每10个符号合并为1帧
+    [~, column] = size(bits); % 读取发送数据矩阵维度
+
+    for i = 1:column / symbol_per_frame
+        Bits(:, :, i) = bits(:, (i - 1) * symbol_per_frame + 1:i * symbol_per_frame);
+        final(:, :, i) = reshape(Bits(:, :, i), 4 * symbol_per_frame, 1);
+    end
+
+    SimParams.MessageBits = final;
 
     %% USRP transmitter parameters
     %{
@@ -68,7 +83,7 @@ function SimParams = sdruqpsktransmitter_init(useCodegen)
 
     SimParams.MasterClockRate = 100e6; % Hz
 
-    SimParams.USRPCenterFrequency = 915e6;
+    SimParams.USRPCenterFrequency = 987e6;
     SimParams.USRPGain = 25;
     SimParams.USRPFrontEndSampleRate = SimParams.Rsym * 2; % Nyquist sampling theorem
     SimParams.USRPInterpolationFactor = SimParams.MasterClockRate / SimParams.USRPFrontEndSampleRate;
@@ -77,4 +92,5 @@ function SimParams = sdruqpsktransmitter_init(useCodegen)
     % Experiment Parameters
     SimParams.USRPFrameTime = SimParams.USRPFrameLength / SimParams.USRPFrontEndSampleRate;
     SimParams.StopTime = 1000;
+
 end

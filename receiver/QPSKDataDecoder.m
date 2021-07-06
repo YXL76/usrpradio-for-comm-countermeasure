@@ -13,15 +13,18 @@ classdef QPSKDataDecoder < matlab.System
         DescramblerInitialConditions = [0 0 0 0];
         BerMask = [];
         PrintOption = false;
+        InterweaveDepth = 7;
+        InterweaveLength = 20;
+
     end
 
     properties (Access = private)
         pPayloadLength
         pQPSKDemodulator
         pDescrambler
-        pErrorRateCalc
-        pTargetBits
-        pBER
+        % pErrorRateCalc
+        % pTargetBits
+        pBER;
     end
 
     properties (Constant, Access = private)
@@ -50,9 +53,9 @@ classdef QPSKDataDecoder < matlab.System
             obj.pDescrambler = comm.Descrambler(obj.DescramblerBase, ...
                 obj.DescramblerPolynomial, obj.DescramblerInitialConditions);
 
-            obj.pErrorRateCalc = comm.ErrorRate(...
-                'Samples', 'Custom', ...
-                'CustomSamples', obj.BerMask);
+            % obj.pErrorRateCalc = comm.ErrorRate(...
+            %     'Samples', 'Custom', ...
+                %     'CustomSamples', obj.BerMask);
 
             % Since we only calculate BER on message part, 000s are not
             % necessary here, they are just place-holder.
@@ -63,7 +66,7 @@ classdef QPSKDataDecoder < matlab.System
                     sprintf('%s %03d\n', obj.pMessage, mod(msgCnt, 100));
             end
 
-            obj.pTargetBits = reshape(de2bi(msgSet, 7, 'left-msb')', [], 1);
+            % obj.pTargetBits = reshape(de2bi(msgSet, 7, 'left-msb')', [], 1);
         end
 
         function BER = stepImpl(obj, data, isValid)
@@ -82,15 +85,22 @@ classdef QPSKDataDecoder < matlab.System
                 deScrData = obj.pDescrambler(...
                     demodOut(obj.HeaderLength + (1:obj.PayloadLength)));
 
-                % Recovering the message from the data
-                charSet = int8(bi2de(reshape(deScrData, 7, [])', 'left-msb'));
+                deScrData = reshape(deScrData, [obj.InterweaveDepth, obj.InterweaveLength]);
+                deScrData = transpose(deScrData);
+                deScrData = reshape(deScrData, [], 1);
 
+                code = decode(deScrData, 7, 4);
+
+                % Recovering the message from the data
                 if (obj.PrintOption)
-                    fprintf('%s', char(charSet));
+
+                    fprintf(' %d ', transpose(int8(bi2de(reshape(code, 4, [])', 'left-msb'))));
+                    fprintf('\n');
+                    % fprintf('%s', char(charSet));
                 end
 
                 % Perform BER calculation only on message part
-                obj.pBER = obj.pErrorRateCalc(obj.pTargetBits, deScrData);
+                % obj.pBER = obj.pErrorRateCalc(obj.pTargetBits, deScrData);
             end
 
             BER = obj.pBER;
@@ -99,14 +109,14 @@ classdef QPSKDataDecoder < matlab.System
         function resetImpl(obj)
             reset(obj.pQPSKDemodulator);
             reset(obj.pDescrambler);
-            reset(obj.pErrorRateCalc);
+            % reset(obj.pErrorRateCalc);
             obj.pBER = zeros(3, 1);
         end
 
         function releaseImpl(obj)
             release(obj.pQPSKDemodulator);
             release(obj.pDescrambler);
-            release(obj.pErrorRateCalc);
+            % release(obj.pErrorRateCalc);
             obj.pBER = zeros(3, 1);
         end
 

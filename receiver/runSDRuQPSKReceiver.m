@@ -30,6 +30,8 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
             'DescramblerPolynomial', prmQPSKReceiver.ScramblerPolynomial, ...
             'DescramblerInitialConditions', prmQPSKReceiver.ScramblerInitialConditions, ...
             'BerMask', prmQPSKReceiver.BerMask, ...
+            'InterweaveDepth', prmQPSKReceiver.InterweaveDepth, ...
+            'InterweaveLength', prmQPSKReceiver.InterweaveLength, ...
             'PrintOption', printData);
 
         % Create and configure the SDRu System object. Set the SerialNum for B2xx
@@ -116,18 +118,18 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
     while ~tt
         d = clock;
 
-        if (mod(d(6), 1) > 0.5)
+        if (mod(d(6), 2) > 1)
 
             if ~flag
                 tt = true;
                 flag = true;
-                radio.CenterFrequency = 915e6;
+                radio.CenterFrequency = 987e6;
             end
 
         elseif flag
             tt = true;
             flag = false;
-            radio.CenterFrequency = 914e6;
+            radio.CenterFrequency = 986e6;
         end
 
     end
@@ -149,16 +151,16 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
 
         d = clock;
 
-        if (mod(d(6), 1) > 0.5)
+        if (mod(d(6), 2) > 1)
 
             if ~flag
                 flag = true;
-                radio.CenterFrequency = 915e6;
+                radio.CenterFrequency = 987e6;
             end
 
         elseif flag
             flag = false;
-            radio.CenterFrequency = 914e6;
+            radio.CenterFrequency = 986e6;
         end
 
     end

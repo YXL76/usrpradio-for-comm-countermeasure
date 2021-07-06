@@ -1,9 +1,9 @@
 classdef QPSKBitsGenerator < matlab.System
     %#codegen
     % Generates the bits for each frame
-    
+
     %   Copyright 2012-2017 The MathWorks, Inc.
-    
+
     properties (Nontunable)
         ScramblerBase = 2;
         ScramblerPolynomial = [1 1 1 0 1];
@@ -12,73 +12,83 @@ classdef QPSKBitsGenerator < matlab.System
         MessageLength = 16;
         MessageBits = [];
     end
-    
-    properties (Access=private)
+
+    properties (Access = private)
+        pGen
         pHeader
         pScrambler
         pSigSrc
     end
-    
-    properties (Access=private, Nontunable)
+
+    properties (Access = private, Nontunable)
         pBarkerCode = [+1 +1 +1 +1 +1 -1 -1 +1 +1 -1 +1 -1 +1]; % Bipolar Barker Code
     end
-    
+
     methods
+
         function obj = QPSKBitsGenerator(varargin)
-            setProperties(obj,nargin,varargin{:});
+            setProperties(obj, nargin, varargin{:});
         end
+
     end
-    
-    methods (Access=protected)
+
+    methods (Access = protected)
+
         function setupImpl(obj, ~)
+            obj.pGen = gen2par(hammgen(7 - 4)); % m = n - k
+
             % Generate unipolar Barker Code and duplicate it as header
             ubc = ((obj.pBarkerCode + 1) / 2)';
-            temp = (repmat(ubc,1,2))';
+            temp = (repmat(ubc, 1, 2))';
             obj.pHeader = temp(:);
-            
+
             % Initialize scrambler system object
-            obj.pScrambler = comm.Scrambler( ...
+            obj.pScrambler = comm.Scrambler(...
                 obj.ScramblerBase, ...
                 obj.ScramblerPolynomial, ...
                 obj.ScramblerInitialConditions);
-            
+
             % Initialize signal source
             obj.pSigSrc = dsp.SignalSource(obj.MessageBits, ...
                 'SamplesPerFrame', obj.MessageLength * 7 * obj.NumberOfMessage, ...
                 'SignalEndAction', 'Cyclic repetition');
-            
+
         end
-        
+
         function [y, msgBin] = stepImpl(obj)
-            
+
             % Generate message binaries from signal source.
             msgBin = obj.pSigSrc();
-            
+            msgBin = reshape(msgBin, 4, []).'; % k
+            code = rem(msgBin * obj.pGen, 2);
+            code = reshape(code, [], 1);
+
             % Scramble the data
-            scrambledMsg = obj.pScrambler(msgBin);
-            
+            scrambledMsg = obj.pScrambler(code);
+
             % Append the scrambled bit sequence to the header
-            y = [obj.pHeader ; scrambledMsg];
-            
+            y = [obj.pHeader; scrambledMsg];
+
         end
-        
+
         function resetImpl(obj)
             reset(obj.pScrambler);
             reset(obj.pSigSrc);
         end
-        
+
         function releaseImpl(obj)
             release(obj.pScrambler);
             release(obj.pSigSrc);
         end
-        
+
         function N = getNumInputsImpl(~)
             N = 0;
         end
-        
+
         function N = getNumOutputsImpl(~)
             N = 2;
         end
-    end
-end
 
+    end
+
+end

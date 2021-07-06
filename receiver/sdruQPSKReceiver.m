@@ -13,7 +13,7 @@ compileIt = false; % true if code is to be compiled for accelerated execution
 useCodegen = false; % true to run the latest generated code (mex file) instead of MATLAB code
 
 % Receiver parameter structure
-prmQPSKReceiver = sdruqpskreceiver_init(platform, useCodegen)
+prmQPSKReceiver = sdruqpskreceiver_init(useCodegen)
 prmQPSKReceiver.Platform = platform;
 prmQPSKReceiver.Address = address;
 
@@ -28,6 +28,6 @@ else
     BER = runSDRuQPSKReceiver(prmQPSKReceiver, printReceivedData);
 end
 
-fprintf('Error rate is = %f.\n', BER(1));
-fprintf('Number of detected errors = %d.\n', BER(2));
-fprintf('Total number of compared samples = %d.\n', BER(3));
+% fprintf('Error rate is = %f.\n', BER(1));
+% fprintf('Number of detected errors = %d.\n', BER(2));
+% fprintf('Total number of compared samples = %d.\n', BER(3));

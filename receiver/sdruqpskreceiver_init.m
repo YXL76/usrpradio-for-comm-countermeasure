@@ -1,4 +1,4 @@
-function SimParams = sdruqpskreceiver_init(platform, useCodegen)
+function SimParams = sdruqpskreceiver_init(useCodegen)
 
     %% General simulation parameters
     if useCodegen
@@ -18,10 +18,11 @@ function SimParams = sdruqpskreceiver_init(platform, useCodegen)
     SimParams.BarkerCode = [+1 +1 +1 +1 +1 -1 -1 +1 +1 -1 +1 -1 +1]; % Bipolar Barker Code
     SimParams.BarkerLength = length(SimParams.BarkerCode);
     SimParams.HeaderLength = SimParams.BarkerLength * 2; % Duplicate 2 Barker codes to be as a header
-    SimParams.Message = 'Hello world';
-    SimParams.MessageLength = length(SimParams.Message) + 5; % 'Hello world 000\n'...
-    SimParams.NumberOfMessage = 100; % Number of messages in a frame
-    SimParams.PayloadLength = SimParams.NumberOfMessage * SimParams.MessageLength * 7; % 7 bits per characters
+    SimParams.symbol_per_frame = 20;
+    SimParams.Message = load('randnum.mat').randnum;
+    SimParams.MessageLength = length(SimParams.Message) / SimParams.symbol_per_frame; % 'Hello world 000\n'...
+    SimParams.NumberOfMessage = 1; % Number of messages in a frame
+    SimParams.PayloadLength = SimParams.NumberOfMessage * SimParams.symbol_per_frame * 7; % 7 bits per characters
     SimParams.FrameSize = (SimParams.HeaderLength + SimParams.PayloadLength) ...
         / log2(SimParams.ModulationOrder); % Frame size in symbols
     SimParams.FrameTime = SimParams.Tsym * SimParams.FrameSize;
@@ -51,6 +52,8 @@ function SimParams = sdruqpskreceiver_init(platform, useCodegen)
     SimParams.PreambleDetectorThreshold = 0.8;
 
     %% Message generation and BER calculation parameters
+    %{
+
     msgSet = zeros(100 * SimParams.MessageLength, 1);
 
     for msgCnt = 0:99
@@ -58,16 +61,22 @@ function SimParams = sdruqpskreceiver_init(platform, useCodegen)
             sprintf('%s %03d\n', SimParams.Message, msgCnt);
     end
 
-    bits = de2bi(msgSet, 7, 'left-msb')';
+    %}
+
+    bits = de2bi(SimParams.Message, 4, 'left-msb')';
     SimParams.MessageBits = bits(:);
 
     % For BER calculation masks
     SimParams.BerMask = zeros(SimParams.NumberOfMessage * length(SimParams.Message) * 7, 1);
 
+    %{
+
     for i = 1:SimParams.NumberOfMessage
         SimParams.BerMask((i - 1) * length(SimParams.Message) * 7 + (1:length(SimParams.Message) * 7)) = ...
             (i - 1) * SimParams.MessageLength * 7 + (1:length(SimParams.Message) * 7);
     end
+
+    %}
 
     %% USRP receiver parameters
     %{
@@ -92,11 +101,14 @@ function SimParams = sdruqpskreceiver_init(platform, useCodegen)
 
     SimParams.MasterClockRate = 100e6; % Hz
 
-    SimParams.USRPCenterFrequency = 915e6;
+    SimParams.USRPCenterFrequency = 987e6;
     SimParams.USRPGain = 31;
     SimParams.USRPFrontEndSampleRate = SimParams.Rsym * 2; % Nyquist sampling theorem
     SimParams.USRPDecimationFactor = SimParams.MasterClockRate / SimParams.USRPFrontEndSampleRate;
     SimParams.USRPFrameLength = SimParams.Interpolation * SimParams.FrameSize;
+
+    SimParams.InterweaveDepth = SimParams.symbol_per_frame;
+    SimParams.InterweaveLength = 7;
 
     % Experiment parameters
     SimParams.USRPFrameTime = SimParams.USRPFrameLength / SimParams.USRPFrontEndSampleRate;

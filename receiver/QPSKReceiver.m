@@ -30,6 +30,8 @@ classdef (StrictDefaults)QPSKReceiver < matlab.System
         DescramblerInitialConditions = [0 0 0 0];
         BerMask = [];
         PrintOption = false;
+        InterweaveDepth = 7;
+        InterweaveLength = 10;
     end
 
     properties (Access = private)
@@ -122,7 +124,9 @@ classdef (StrictDefaults)QPSKReceiver < matlab.System
                 'DescramblerPolynomial', obj.DescramblerPolynomial, ...
                 'DescramblerInitialConditions', obj.DescramblerInitialConditions, ...
                 'BerMask', obj.BerMask, ...
-                'PrintOption', obj.PrintOption);
+                'PrintOption', obj.PrintOption, ...
+                'InterweaveDepth', obj.InterweaveDepth, ...
+                'InterweaveLength', obj.InterweaveLength);
         end
 
         function [RCRxSignal, timingRecSignal, fineCompSignal, BER] = stepImpl(obj, bufferSignal)
