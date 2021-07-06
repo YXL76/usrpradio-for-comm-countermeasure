@@ -113,7 +113,7 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
     currentTime = 0;
 
     timestep = 2;
-    d = clock;
+    d = datevec(datetime('now'));
     fcIdx = max(ceil(d(6) / timestep), 1);
     flag = mod(fcIdx * timestep, 60);
     radio.CenterFrequency = prmQPSKReceiver.Fcs(fcIdx);
@@ -129,7 +129,7 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
             [rcvdSignal, len] = step(radio);
         end
 
-        d = clock;
+        d = datevec(datetime('now'));
 
         if paused && d(6) > flag
             flag = flag + timestep - 0.2;

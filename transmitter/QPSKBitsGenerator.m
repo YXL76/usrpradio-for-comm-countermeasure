@@ -11,10 +11,15 @@ classdef QPSKBitsGenerator < matlab.System
         NumberOfMessage = 10;
         MessageLength = 16;
         MessageBits = [];
+
+        % Gen = gen2par(hammgen(7 - 4));
+        Gen = [1 1 0 1 0 0 0;
+            0 1 1 0 1 0 0;
+            1 1 1 0 0 1 0;
+            1 0 1 0 0 0 1]
     end
 
     properties (Access = private)
-        pGen
         pHeader
         pScrambler
         pSigSrc
@@ -35,8 +40,6 @@ classdef QPSKBitsGenerator < matlab.System
     methods (Access = protected)
 
         function setupImpl(obj, ~)
-            obj.pGen = gen2par(hammgen(7 - 4)); % m = n - k
-
             % Generate unipolar Barker Code and duplicate it as header
             ubc = ((obj.pBarkerCode + 1) / 2)';
             temp = (repmat(ubc, 1, 2))';
@@ -60,7 +63,7 @@ classdef QPSKBitsGenerator < matlab.System
             % Generate message binaries from signal source.
             msgBin = obj.pSigSrc();
             msgBin = reshape(msgBin, 4, []).'; % k
-            code = rem(msgBin * obj.pGen, 2);
+            code = rem(msgBin * obj.Gen, 2);
             code = reshape(code, [], 1);
 
             % Scramble the data

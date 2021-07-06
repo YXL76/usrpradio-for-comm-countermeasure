@@ -9,16 +9,13 @@ else
 end
 
 printReceivedData = true; % true if the received data is to be printed
-% compileIt = false; % true if code is to be compiled for accelerated execution
-% useCodegen = false; % true to run the latest generated code (mex file) instead of MATLAB code
+compileIt = false; % true if code is to be compiled for accelerated execution
+useCodegen = false; % true to run the latest generated code (mex file) instead of MATLAB code
 
 % Receiver parameter structure
-% prmQPSKReceiver = sdruqpskreceiver_init(useCodegen)
-prmQPSKReceiver = sdruqpskreceiver_init() %#ok<NOPTS>
-prmQPSKReceiver.Platform = platform;    
+prmQPSKReceiver = sdruqpskreceiver_init(useCodegen) %#ok<NOPTS>
+prmQPSKReceiver.Platform = platform;
 prmQPSKReceiver.Address = address;
-
-%{
 
 if compileIt
     codegen('runSDRuQPSKReceiver', '-args', {coder.Constant(prmQPSKReceiver), coder.Constant(printReceivedData)}); %#ok<UNRCH>
@@ -30,10 +27,6 @@ if useCodegen
 else
     BER = runSDRuQPSKReceiver(prmQPSKReceiver, printReceivedData);
 end
-
-%}
-
-BER = runSDRuQPSKReceiver(prmQPSKReceiver, printReceivedData);
 
 % fprintf('Error rate is = %f.\n', BER(1));
 % fprintf('Number of detected errors = %d.\n', BER(2));

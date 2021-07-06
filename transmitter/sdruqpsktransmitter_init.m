@@ -1,21 +1,15 @@
 % function SimParams = sdruqpsktransmitter_init(platform, useCodegen)
 
-function SimParams = sdruqpsktransmitter_init()
+function SimParams = sdruqpsktransmitter_init(useCodegen)
 
     %% General simulation parameters
-    %{
-
     if useCodegen
         SimParams.Rsym = 0.4e6; % Symbol rate in Hertz
     else
         SimParams.Rsym = 0.2e6; % Symbol rate in Hertz
     end
 
-    %}
-
     SimParams.Fcs = load('fc.mat').fc;
-
-    SimParams.Rsym = 0.2e6; % Symbol rate in Hertz
 
     SimParams.ModulationOrder = 4; % QPSK alphabet size
     SimParams.Interpolation = 2; % Interpolation factor
@@ -63,8 +57,8 @@ function SimParams = sdruqpsktransmitter_init()
     [~, column] = size(bits); % 读取发送数据矩阵维度
 
     for i = 1:column / symbol_per_frame
-        Bits(:, :, i) = bits(:, (i - 1) * symbol_per_frame + 1:i * symbol_per_frame);
-        final(:, :, i) = reshape(Bits(:, :, i), 4 * symbol_per_frame, 1);
+        Bits(:, :, i) = bits(:, (i - 1) * symbol_per_frame + 1:i * symbol_per_frame); %#ok<AGROW>
+        final(:, :, i) = reshape(Bits(:, :, i), 4 * symbol_per_frame, 1); %#ok<AGROW>
     end
 
     SimParams.MessageBits = final;

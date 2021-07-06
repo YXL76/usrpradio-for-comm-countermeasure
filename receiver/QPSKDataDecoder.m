@@ -16,6 +16,19 @@ classdef QPSKDataDecoder < matlab.System
         InterweaveDepth = 20;
         InterweaveLength = 7;
 
+        % [H] = hammgen(7 - 4)
+        % Trt = syndtable(H);
+        H = [1 0 0 1 0 1 1;
+            0 1 0 1 1 1 0;
+            0 0 1 0 1 1 1]
+        Trt = [0 0 0 0 0 0 0;
+            0 0 1 0 0 0 0;
+            0 1 0 0 0 0 0;
+            0 0 0 0 1 0 0;
+            1 0 0 0 0 0 0;
+            0 0 0 0 0 0 1;
+            0 0 0 1 0 0 0;
+            0 0 0 0 0 1 0]
     end
 
     properties (Access = private)
@@ -25,8 +38,6 @@ classdef QPSKDataDecoder < matlab.System
         % pErrorRateCalc
         % pTargetBits
         pBER;
-        pH;
-        pTrt;
     end
 
     properties (Constant, Access = private)
@@ -74,9 +85,6 @@ classdef QPSKDataDecoder < matlab.System
 
             %}
 
-            [h] = hammgen(7 - 4);
-            obj.pH = h;
-            obj.pTrt = syndtable(h);
         end
 
         function [BER, msg] = stepImpl(obj, data, isValid)
@@ -100,9 +108,9 @@ classdef QPSKDataDecoder < matlab.System
                 deScrData = reshape(deScrData, [], 1);
 
                 code = reshape(deScrData.', 7, []).';
-                syndrome = rem(code * obj.pH', 2);
+                syndrome = rem(code * obj.H', 2);
                 err = bi2de(fliplr(syndrome));
-                err_loc = obj.pTrt(err + 1, :);
+                err_loc = obj.Trt(err + 1, :);
                 ccode = rem(err_loc + code, 2);
                 msg = ccode(:, 4:7); % 7 - 4 + 1 = 4
                 msg = int8(bi2de(msg, 'left-msb'));

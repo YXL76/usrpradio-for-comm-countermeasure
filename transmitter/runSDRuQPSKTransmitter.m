@@ -79,7 +79,7 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
     currentTime = 0;
 
     timestep = 2;
-    d = clock;
+    d = datevec(datetime('now'));
     fcIdx = max(ceil(d(6) / timestep), 1);
     % flag = mod((fcIdx + 1) * timestep, 60);
     flag = mod(fcIdx * timestep - 0.2, 60);
@@ -90,7 +90,7 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
     %Transmission Process
     while currentTime < prmQPSKTransmitter.StopTime
 
-        d = clock;
+        d = datevec(datetime('now'));
 
         if paused && d(6) > flag
             flag = flag + timestep - 0.2;
