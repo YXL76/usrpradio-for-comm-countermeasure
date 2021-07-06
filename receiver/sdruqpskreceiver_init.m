@@ -1,11 +1,19 @@
-function SimParams = sdruqpskreceiver_init(useCodegen)
+% function SimParams = sdruqpskreceiver_init(platform, useCodegen)
+
+function SimParams = sdruqpskreceiver_init()
 
     %% General simulation parameters
+    %{
+
     if useCodegen
         SimParams.Rsym = 0.4e6; % Symbol rate in Hertz
     else
         SimParams.Rsym = 0.2e6; % Symbol rate in Hertz
     end
+
+    %}
+
+    SimParams.Rsym = 0.2e6; % Symbol rate in Hertz
 
     SimParams.ModulationOrder = 4; % QPSK alphabet size
     SimParams.Interpolation = 2; % Interpolation factor
