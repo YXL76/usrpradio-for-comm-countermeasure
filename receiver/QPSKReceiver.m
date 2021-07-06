@@ -30,8 +30,8 @@ classdef (StrictDefaults)QPSKReceiver < matlab.System
         DescramblerInitialConditions = [0 0 0 0];
         BerMask = [];
         PrintOption = false;
-        InterweaveDepth = 7;
-        InterweaveLength = 10;
+        InterweaveDepth = 20;
+        InterweaveLength = 7;
     end
 
     properties (Access = private)

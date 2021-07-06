@@ -13,8 +13,8 @@ classdef QPSKDataDecoder < matlab.System
         DescramblerInitialConditions = [0 0 0 0];
         BerMask = [];
         PrintOption = false;
-        InterweaveDepth = 7;
-        InterweaveLength = 20;
+        InterweaveDepth = 20;
+        InterweaveLength = 7;
 
     end
 
@@ -25,6 +25,8 @@ classdef QPSKDataDecoder < matlab.System
         % pErrorRateCalc
         % pTargetBits
         pBER;
+        pH;
+        pTrt;
     end
 
     properties (Constant, Access = private)
@@ -59,6 +61,8 @@ classdef QPSKDataDecoder < matlab.System
 
             % Since we only calculate BER on message part, 000s are not
             % necessary here, they are just place-holder.
+            %{
+
             msgSet = zeros(obj.NumberOfMessage * obj.pMessageLength, 1);
 
             for msgCnt = 0:obj.NumberOfMessage - 1
@@ -66,7 +70,13 @@ classdef QPSKDataDecoder < matlab.System
                     sprintf('%s %03d\n', obj.pMessage, mod(msgCnt, 100));
             end
 
-            % obj.pTargetBits = reshape(de2bi(msgSet, 7, 'left-msb')', [], 1);
+            obj.pTargetBits = reshape(de2bi(msgSet, 7, 'left-msb')', [], 1);
+
+            %}
+
+            [h] = hammgen(7 - 4);
+            obj.pH = h;
+            obj.pTrt = syndtable(h);
         end
 
         function BER = stepImpl(obj, data, isValid)
@@ -89,12 +99,17 @@ classdef QPSKDataDecoder < matlab.System
                 deScrData = transpose(deScrData);
                 deScrData = reshape(deScrData, [], 1);
 
-                code = decode(deScrData, 7, 4);
+                code = reshape(deScrData.', 7, []).';
+                syndrome = rem(code * obj.pH', 2);
+                err = bi2de(fliplr(syndrome));
+                err_loc = obj.pTrt(err + 1, :);
+                ccode = rem(err_loc + code, 2);
+                msg = ccode(:, 4:7); % 7 - 4 + 1 = 4
 
                 % Recovering the message from the data
                 if (obj.PrintOption)
 
-                    fprintf(' %d ', transpose(int8(bi2de(reshape(code, 4, [])', 'left-msb'))));
+                    fprintf(' %d ', transpose(int8(bi2de(msg, 'left-msb'))));
                     fprintf('\n');
                     % fprintf('%s', char(charSet));
                 end
