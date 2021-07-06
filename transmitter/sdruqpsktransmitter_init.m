@@ -29,7 +29,8 @@ function SimParams = sdruqpsktransmitter_init()
     SimParams.Message = load("randnum.mat").randnum;
     SimParams.MessageLength = length(SimParams.Message); % 'Hello world 000\n'...
     SimParams.NumberOfMessage = 1; % Number of messages in a frame
-    SimParams.PayloadLength = SimParams.NumberOfMessage * SimParams.symbol_per_frame * 7; % 7 bits per characters
+    symbol_per_frame = 10; % 每10个符号合并为1帧
+    SimParams.PayloadLength = SimParams.NumberOfMessage * symbol_per_frame * 7; % 7 bits per characters
     SimParams.FrameSize = (SimParams.HeaderLength + SimParams.PayloadLength) ...
         / log2(SimParams.ModulationOrder); % Frame size in symbols
     SimParams.FrameTime = SimParams.Tsym * SimParams.FrameSize;
@@ -57,7 +58,6 @@ function SimParams = sdruqpsktransmitter_init()
     %}
 
     bits = de2bi(SimParams.Message, 4, 'left-msb')';
-    symbol_per_frame = 10; % 每10个符号合并为1帧
     [~, column] = size(bits); % 读取发送数据矩阵维度
 
     for i = 1:column / symbol_per_frame

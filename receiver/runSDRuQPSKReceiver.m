@@ -129,7 +129,7 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
         elseif flag
             tt = true;
             flag = false;
-            radio.CenterFrequency = 986e6;
+            radio.CenterFrequency = 987e6;
         end
 
     end
@@ -160,7 +160,7 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
 
         elseif flag
             flag = false;
-            radio.CenterFrequency = 986e6;
+            radio.CenterFrequency = 987e6;
         end
 
     end
