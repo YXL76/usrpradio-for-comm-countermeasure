@@ -110,6 +110,28 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
     BER = [];
     currentTime = 0;
 
+    flag = false;
+    tt = false;
+
+    while ~tt
+        d = clock;
+
+        if (mod(d(6), 1) > 0.5)
+
+            if ~flag
+                tt = true;
+                flag = true;
+                radio.CenterFrequency = 915e6;
+            end
+
+        elseif flag
+            tt = true;
+            flag = false;
+            radio.CenterFrequency = 914e6;
+        end
+
+    end
+
     while currentTime < prmQPSKReceiver.StopTime
         % Keep accessing the SDRu System object output until it is valid
         while len <= 0
@@ -124,6 +146,21 @@ function BER = runSDRuQPSKReceiver(prmQPSKReceiver, printData)
 
         len = uint32(0);
         currentTime = currentTime + prmQPSKReceiver.USRPFrameTime;
+
+        d = clock;
+
+        if (mod(d(6), 1) > 0.5)
+
+            if ~flag
+                flag = true;
+                radio.CenterFrequency = 915e6;
+            end
+
+        elseif flag
+            flag = false;
+            radio.CenterFrequency = 914e6;
+        end
+
     end
 
     release(qpskRx);

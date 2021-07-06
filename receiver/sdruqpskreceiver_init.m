@@ -100,6 +100,6 @@ function SimParams = sdruqpskreceiver_init(platform, useCodegen)
 
     % Experiment parameters
     SimParams.USRPFrameTime = SimParams.USRPFrameLength / SimParams.USRPFrontEndSampleRate;
-    SimParams.StopTime = 10;
+    SimParams.StopTime = 100;
 
 end

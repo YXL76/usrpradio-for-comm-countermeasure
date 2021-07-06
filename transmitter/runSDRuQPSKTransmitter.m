@@ -76,23 +76,12 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
 
     disp('start')
 
-    % t = timer('StartDelay', 0, 'Period', 1, 'TasksToExecute', Inf, ...
-        %     'ExecutionMode', 'fixedRate');
-
-    % t.TimerFcn = @(~, ~)cb_fcn;
-
-    % start(t)
-
     currentTime = 0;
 
-    tic
+    flag = false;
 
     %Transmission Process
     while currentTime < prmQPSKTransmitter.StopTime
-
-        % if radio.CenterFrequency ~= 910e6
-        %     radio.CenterFrequency = 910e6
-        % end
 
         % Bit generation, modulation and transmission filtering
         data = hTx();
@@ -103,10 +92,16 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
 
         d = clock;
 
-        if mod(d(6), 4) > 2
-            radio.CenterFrequency = 910e6;
-        else
-            radio.CenterFrequency = 911e6;
+        if (mod(d(6), 1) > 0.5)
+
+            if ~flag
+                flag = true;
+                radio.CenterFrequency = 915e6;
+            end
+
+        elseif flag
+            flag = false;
+            radio.CenterFrequency = 914e6;
         end
 
     end
@@ -115,4 +110,5 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
 
     release(hTx);
     release(radio);
+
 end
