@@ -11,6 +11,8 @@ end
 compileIt = false; % true if code is to be compiled for accelerated execution
 useCodegen = false; % true to run the latest generated mex file
 
+coder.extrinsic('clock');
+
 % Transmitter parameter structure
 % prmQPSKTransmitter = sdruqpsktransmitter_init(platform, useCodegen);
 prmQPSKTransmitter = sdruqpsktransmitter_init(useCodegen) %#ok<NOPTS>

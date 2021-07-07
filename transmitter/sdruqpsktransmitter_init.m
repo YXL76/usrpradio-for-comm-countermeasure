@@ -9,8 +9,6 @@ function SimParams = sdruqpsktransmitter_init(useCodegen)
         SimParams.Rsym = 0.2e6; % Symbol rate in Hertz
     end
 
-    SimParams.Fcs = load('fc.mat').fc;
-
     SimParams.ModulationOrder = 4; % QPSK alphabet size
     SimParams.Interpolation = 2; % Interpolation factor
     SimParams.Decimation = 1; % Decimation factor
@@ -25,7 +23,7 @@ function SimParams = sdruqpsktransmitter_init(useCodegen)
     SimParams.Message = load("randnum.mat").randnum;
     SimParams.MessageLength = length(SimParams.Message); % 'Hello world 000\n'...
     SimParams.NumberOfMessage = 1; % Number of messages in a frame
-    symbol_per_frame = 10; % 每10个符号合并为1帧
+    symbol_per_frame = 20; % 每10个符号合并为1帧
     SimParams.PayloadLength = SimParams.NumberOfMessage * symbol_per_frame * 7; % 7 bits per characters
     SimParams.FrameSize = (SimParams.HeaderLength + SimParams.PayloadLength) ...
         / log2(SimParams.ModulationOrder); % Frame size in symbols

@@ -78,25 +78,18 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
 
     currentTime = 0;
 
-    timestep = 2;
-    d = datevec(datetime('now'));
+    timestep = 5;
+    % d = datevec(datetime('now'));
+    d = clock;
     fcIdx = max(ceil(d(6) / timestep), 1);
-    % flag = mod((fcIdx + 1) * timestep, 60);
-    flag = mod(fcIdx * timestep - 0.2, 60);
     radio.CenterFrequency = prmQPSKTransmitter.Fcs(fcIdx);
-
-    paused = false;
 
     %Transmission Process
     while currentTime < prmQPSKTransmitter.StopTime
 
-        d = datevec(datetime('now'));
-
-        if paused && d(6) > flag
-            flag = flag + timestep - 0.2;
-            paused = false;
-            continue
-        end
+        % d = datevec(datetime('now'));
+        d = clock;
+        d = max(ceil(d(6) / timestep), 1);
 
         % Bit generation, modulation and transmission filtering
         data = hTx();
@@ -105,18 +98,9 @@ function runSDRuQPSKTransmitter(prmQPSKTransmitter)
         % Update simulation time
         currentTime = currentTime + prmQPSKTransmitter.USRPFrameTime;
 
-        if d(6) > flag
-            flag = flag + 0.2;
-
-            if flag >= 60
-                flag = 0;
-                fcIdx = 1;
-            else
-                fcIdx = fcIdx + 1;
-            end
-
-            radio.CenterFrequency = prmQPSKTransmitter.Fcs(fcIdx);
-            paused = true;
+        if d ~= fcIdx
+            fcIdx = d;
+            radio.CenterFrequency = prmQPSKTransmitter.Fcs(d);
         end
 
         %{

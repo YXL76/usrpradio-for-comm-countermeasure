@@ -38,6 +38,8 @@ classdef QPSKDataDecoder < matlab.System
         % pErrorRateCalc
         % pTargetBits
         pBER;
+        pIdx = 1;
+        pFile;
     end
 
     properties (Constant, Access = private)
@@ -85,9 +87,12 @@ classdef QPSKDataDecoder < matlab.System
 
             %}
 
+            mater = ('outputblue.mat');
+            obj.pFile = matfile(mater, 'Writable', true);
+
         end
 
-        function [BER, msg] = stepImpl(obj, data, isValid)
+        function BER = stepImpl(obj, data, isValid)
 
             if isValid
                 % Phase ambiguity estimation
@@ -115,11 +120,21 @@ classdef QPSKDataDecoder < matlab.System
                 msg = ccode(:, 4:7); % 7 - 4 + 1 = 4
                 msg = int8(bi2de(msg, 'left-msb'));
 
+                len = length(msg);
+
+                if isprop(obj.pFile, 'outputblue')
+                    obj.pFile.outputblue((obj.pIdx):(obj.pIdx + len - 1), 1) = msg;
+                else
+                    obj.pFile.outputblue = msg;
+                end
+
+                obj.pIdx = obj.pIdx +len;
+
                 % Recovering the message from the data
                 % if (obj.PrintOption)
                 %
-                %     fprintf(' %d ', transpose(int8(bi2de(msg, 'left-msb'))));
-                %     fprintf('\n');
+                % fprintf(' %d ', transpose(msg));
+                % fprintf('\n');
                 %     % fprintf('%s', char(charSet));
                 % end
 

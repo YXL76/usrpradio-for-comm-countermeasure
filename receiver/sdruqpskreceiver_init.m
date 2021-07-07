@@ -9,8 +9,6 @@ function SimParams = sdruqpskreceiver_init(useCodegen)
         SimParams.Rsym = 0.2e6; % Symbol rate in Hertz
     end
 
-    SimParams.Fcs = load('fc.mat').fc;
-
     SimParams.ModulationOrder = 4; % QPSK alphabet size
     SimParams.Interpolation = 2; % Interpolation factor
     SimParams.Decimation = 1; % Decimation factor
@@ -23,7 +21,7 @@ function SimParams = sdruqpskreceiver_init(useCodegen)
     SimParams.BarkerLength = length(SimParams.BarkerCode);
     SimParams.HeaderLength = SimParams.BarkerLength * 2; % Duplicate 2 Barker codes to be as a header
     SimParams.symbol_per_frame = 20;
-    SimParams.Message = load('datatest.mat').x;
+    SimParams.Message = load('randnum.mat').randnum;
     SimParams.MessageLength = length(SimParams.Message) / SimParams.symbol_per_frame; % 'Hello world 000\n'...
     SimParams.NumberOfMessage = 1; % Number of messages in a frame
     SimParams.PayloadLength = SimParams.NumberOfMessage * SimParams.symbol_per_frame * 7; % 7 bits per characters
